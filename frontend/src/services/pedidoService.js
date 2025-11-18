@@ -1,4 +1,4 @@
-import API_URL from '../config/api.js';
+const API_URL = 'https://burgertic-jacofsky-czerwiak.vercel.app/api';
 
 export const obtenerPedidos = async () => {
   try {
