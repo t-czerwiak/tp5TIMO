@@ -1,21 +1,28 @@
-import express from "express";
-import PlatosRouter from "./routes/platos.router.js";
-import AuthRouter from "./routes/auth.router.js";
-import PedidosRouter from "./routes/pedidos.router.js";
-import cors from "cors";
-import "dotenv/config";
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const db = require('./db');
+const authRoutes = require('./routes/auth.router');
+const platosRoutes = require('./routes/platos.router');
+const pedidosRoutes = require('./routes/pedidos.router');
 
 const app = express();
+const port = process.env.PORT || 3000;
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+app.use(express.static('frontend'));
 
-app.get("/", (_, res) => res.send("BurgerTIC API is running..."));
+app.use('/api/auth', authRoutes);
+app.use('/api/platos', platosRoutes);
+app.use('/api/pedidos', pedidosRoutes);
 
-app.use("/platos", PlatosRouter);
-app.use("/auth", AuthRouter);
-app.use("/pedidos", PedidosRouter);
-
-app.listen(process.env.PORT || 9000, () =>
-    console.log(`Server is running on port ${process.env.PORT || 9000}`)
-);
+db.init().then(() => {
+    app.listen(port, () => {
+        console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
+    });
+}).catch(error => {
+    console.error('❌ Fallo crítico al iniciar el servidor:', error);
+    process.exit(1);
+});

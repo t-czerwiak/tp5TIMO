@@ -1,14 +1,16 @@
-import Router from "express";
-import PlatosController from "../controllers/platos.controller.js";
-import { verifyToken, verifyAdmin } from "../middlewares/auth.middleware.js";
+const express = require('express');
+const router = express.Router();
+const platosController = require('../controllers/platos.controller');
+const { authenticateToken, isAdmin } = require('../middlewares/auth.middleware');
 
-const router = Router();
+// Rutas públicas
+router.get('/', platosController.getAllPlatos);
+router.get('/tipo/:tipo', platosController.getPlatosByTipo);
+router.get('/:id', platosController.getPlatoById);
 
-router.get("/", PlatosController.getPlatos);
-router.get("/:id", PlatosController.getPlatoById);
-router.get("/tipo/:tipo", PlatosController.getPlatosByTipo);
-router.post("/", verifyToken, verifyAdmin, PlatosController.createPlato);
-router.put("/:id", verifyToken, verifyAdmin, PlatosController.updatePlato);
-router.delete("/:id", verifyToken, verifyAdmin, PlatosController.deletePlato);
+// Rutas solo para admin
+router.post('/', authenticateToken, isAdmin, platosController.createPlato);
+router.put('/:id', authenticateToken, isAdmin, platosController.updatePlato);
+router.delete('/:id', authenticateToken, isAdmin, platosController.deletePlato);
 
-export default router;
+module.exports = router;

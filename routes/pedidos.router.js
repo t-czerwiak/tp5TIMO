@@ -1,13 +1,19 @@
-import Router from "express";
-import PedidosController from "../controllers/pedidos.controller.js";
-import { verifyAdmin, verifyToken } from "../middlewares/auth.middleware.js";
+const express = require('express');
+const router = express.Router();
+const pedidosController = require('../controllers/pedidos.controller');
+const { authenticateToken, isAdmin } = require('../middlewares/auth.middleware');
 
-const router = Router();
+// Usuario autenticado puede crear pedido y ver su historial
+router.post('/', authenticateToken, pedidosController.createPedido);
+router.get('/usuario', authenticateToken, pedidosController.getPedidosByUser);
 
-// ------------- COMPLETAR LAS RUTAS DE PEDIDOS -------------
-// IMPORTANTE: La ruta /usuario debe ir antes que la ruta /:id
-// Si no, Express interpretará "usuario" como un id y no funcionará correctamente
+// Admin puede ver todos los pedidos y cambiar estados
+router.get('/', authenticateToken, isAdmin, pedidosController.getPedidos);
+router.get('/:id', authenticateToken, isAdmin, pedidosController.getPedidoById);
+router.put('/:id/aceptar', authenticateToken, isAdmin, pedidosController.aceptarPedido);
+router.put('/:id/comenzar', authenticateToken, isAdmin, pedidosController.comenzarPedido);
+router.put('/:id/entregar', authenticateToken, isAdmin, pedidosController.entregarPedido);
+router.put('/:id/cancelar', authenticateToken, isAdmin, pedidosController.cancelarPedido);
+router.delete('/:id', authenticateToken, isAdmin, pedidosController.deletePedido);
 
-// Recordar utilizar los middleware verifyToken y/o verifyAdmin en las rutas que correspondan
-
-export default router;
+module.exports = router;

@@ -1,41 +1,76 @@
-import UsuariosService from "../services/usuarios.service.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const usuariosService = require('../services/usuarios.service');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'burgertic_secret_key_2024';
 
 const register = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+    const { nombre, apellido, email, password } = req.body;
 
-        Recordar que para cumplir con toda la funcionalidad deben:
+    console.log('📝 Intento de registro:', { nombre, apellido, email }); // Debug
 
-            1. Verificar que el body de la request tenga el campo usuario
-            2. Verificar que el campo usuario tenga los campos nombre, apellido, email y password
-            3. Verificar que no exista un usuario con el mismo email (utilizando el servicio de usuario)
-            4. Devolver un mensaje de error si algo falló hasta el momento (status 400)
-            5. Hashear la contraseña antes de guardarla en la base de datos
-            6. Guardar el usuario en la base de datos (utilizando el servicio de usuario)
-            7. Devolver un mensaje de éxito si todo salió bien (status 201)
-            8. Devolver un mensaje de error si algo falló guardando al usuario (status 500)
-        
-    */
+    if (!nombre || !apellido || !email || !password) {
+        return res.status(400).json({ message: 'Faltan campos obligatorios: nombre, apellido, email y password.' });
+    }
+
+    try {
+        const newUser = await usuariosService.registerUser(nombre, apellido, email, password);
+        const token = jwt.sign({ id: newUser.id, admin: newUser.admin }, JWT_SECRET, { expiresIn: '30m' });
+
+        console.log('✅ Usuario registrado exitosamente:', newUser.email); // Debug
+
+        return res.status(201).json({
+            message: 'Registro exitoso.',
+            user: newUser,
+            token: token
+        });
+    } catch (error) {
+        console.error('❌ Error en registro:', error); // Debug mejorado
+        if (error.message === 'El email ya está registrado.') {
+            return res.status(409).json({ message: error.message });
+        }
+        return res.status(500).json({ message: 'Error interno del servidor: ' + error.message });
+    }
 };
 
 const login = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+    const { email, password } = req.body;
 
-        Recordar que para cumplir con toda la funcionalidad deben:
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Faltan campos obligatorios: email y password.' });
+    }
 
-            1. Verificar que el body de la request tenga el campo email y password
-            2. Buscar un usuario con el email recibido
-            3. Verificar que el usuario exista
-            4. Verificar que la contraseña recibida sea correcta
-            5. Devolver un mensaje de error si algo falló hasta el momento (status 400)
-            6. Crear un token con el id del usuario y firmarlo con la clave secreta (utilizando la librería jsonwebtoken)
-            7. Devolver un json con el usuario y el token (status 200)
-            8. Devolver un mensaje de error si algo falló (status 500)
-        
-    */
+    try {
+        const user = await usuariosService.findUserByEmail(email);
+
+        if (!user) {
+            return res.status(401).json({ message: 'Credenciales inválidas.' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Credenciales inválidas.' });
+        }
+
+        const tokenPayload = { id: user.id, admin: user.admin };
+        const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '30m' });
+
+        delete user.password;
+
+        return res.status(200).json({
+            message: 'Login exitoso.',
+            user: user,
+            token: token
+        });
+
+    } catch (error) {
+        console.error('Error durante el login:', error);
+        return res.status(500).json({ message: 'Error interno del servidor.' });
+    }
 };
 
-export default { register, login };
+module.exports = {
+    register,
+    login,
+};

@@ -1,51 +1,18 @@
-import { Plato } from "../models/platos.model.js";
+const db = require('../db');
 
-const getPlatos = async () => await Plato.findAll();
-
-const getPlatoById = async (id) =>
-    await Plato.findAll({
-        where: {
-            id: id,
-        },
+const getAllPlatos = async () => {
+    const platos = await db.Platos.findAll({
+        where: { activo: true }
     });
-
-const createPlato = async (plato) =>
-    Plato.create({
-        tipo: plato.tipo,
-        nombre: plato.nombre,
-        precio: plato.precio,
-        descripcion: plato.descripcion,
-    });
-
-const updatePlato = async (id, newData) => {
-    const plato = await Plato.findByPk(id);
-
-    if (!plato) throw new Error("Plato no encontrado");
-
-    plato.tipo = newData.tipo;
-    plato.nombre = newData.nombre;
-    plato.precio = newData.precio;
-    plato.descripcion = newData.descripcion;
-
-    await plato.save();
+    return platos.map(p => p.toJSON());
 };
 
-const deletePlato = async (id) => {
-    const plato = await Plato.findByPk(id);
-
-    if (!plato) throw new Error("Plato no encontrado");
-
-    await plato.destroy();
+const getPlatoById = async (id) => {
+    const plato = await db.Platos.findByPk(id);
+    return plato ? plato.toJSON() : null;
 };
 
-const getPlatosByTipo = async (tipo) =>
-    Plato.findAll({ where: { tipo: tipo } });
-
-export default {
-    getPlatos,
-    getPlatoById,
-    createPlato,
-    updatePlato,
-    deletePlato,
-    getPlatosByTipo,
+module.exports = {
+    getAllPlatos,
+    getPlatoById
 };

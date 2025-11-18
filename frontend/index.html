@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BurgerTIC - Las Mejores Hamburguesas</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header con logo -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="logo.png" alt="BurgerTIC Logo" class="logo">
+                    <div class="brand">
+                        <h1>BurgerTIC</h1>
+                    </div>
+                </div>
+                
+                <div id="auth-controls" class="auth-buttons">
+                    <button onclick="scrollToAuth('login')" class="btn btn-outline">Iniciar Sesión</button>
+                    <button onclick="scrollToAuth('register')" class="btn btn-primary">Registrarse</button>
+                </div>
+                
+                <div id="user-controls" class="user-info" style="display:none;">
+                    <div class="user-avatar" id="user-avatar"></div>
+                    <span class="user-badge" id="user-email"></span>
+                    <button onclick="logout()" class="btn btn-danger">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- Sección de Autenticación -->
+            <section id="auth-section" class="auth-section">
+                <div class="auth-container">
+                    <form id="login-form" onsubmit="handleLogin(event)" class="auth-form">
+                        <div class="form-header">
+                            <h2>🔐 Iniciar Sesión</h2>
+                            <p>Ingresa para hacer tu pedido</p>
+                        </div>
+                        <div class="form-group">
+                            <label>📧 Email</label>
+                            <input type="email" id="login-email" placeholder="tu@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>🔒 Contraseña</label>
+                            <input type="password" id="login-password" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+                        <p id="login-message" class="message"></p>
+                        <p class="form-footer">¿No tienes cuenta? <a href="#" onclick="showRegister()">Regístrate aquí</a></p>
+                    </form>
+
+                    <form id="register-form" onsubmit="handleRegister(event)" class="auth-form" style="display:none;">
+                        <div class="form-header">
+                            <h2>📝 Registro</h2>
+                            <p>Crea tu cuenta en BurgerTIC</p>
+                        </div>
+                        <div class="form-group">
+                            <label>👤 Nombre</label>
+                            <input type="text" id="reg-nombre" placeholder="Juan" required>
+                        </div>
+                        <div class="form-group">
+                            <label>👤 Apellido</label>
+                            <input type="text" id="reg-apellido" placeholder="Pérez" required>
+                        </div>
+                        <div class="form-group">
+                            <label>📧 Email</label>
+                            <input type="email" id="reg-email" placeholder="tu@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>🔒 Contraseña</label>
+                            <input type="password" id="reg-password" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Crear Cuenta</button>
+                        <p id="reg-message" class="message"></p>
+                        <p class="form-footer">¿Ya tienes cuenta? <a href="#" onclick="showLogin()">Inicia sesión</a></p>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Sección de Menú -->
+            <section id="menu-section" class="menu-section">
+                <div class="section-header">
+                    <h2>🍽️ Nuestro Menú</h2>
+                    <p>Selecciona tus favoritos y arma tu pedido</p>
+                </div>
+                <div id="menu-list" class="menu-grid">
+                    <div class="loading">🍔 Cargando menú delicioso...</div>
+                </div>
+            </section>
+
+            <!-- Carrito de Compras -->
+            <section id="order-section" class="cart-section">
+                <div class="cart-container">
+                    <div class="cart-header">
+                        <h2>🛒 Tu Carrito</h2>
+                    </div>
+                    <div id="selected-platos" class="cart-items">
+                        <p class="empty-cart">Tu carrito está vacío</p>
+                    </div>
+                    <div class="cart-footer">
+                        <div class="cart-total">
+                            <span>Total:</span>
+                            <span class="total-amount">$<span id="order-total">0.00</span></span>
+                        </div>
+                        <button onclick="confirmarPedido()" id="btn-confirmar" class="btn btn-success btn-block">
+                            ✅ Confirmar Pedido
+                        </button>
+                        <p id="order-message" class="message"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mis Pedidos -->
+            <section id="user-info" class="orders-section" style="display:none;">
+                <div class="section-header">
+                    <h2>📋 Mis Pedidos</h2>
+                    <p>Historial de tus pedidos</p>
+                </div>
+                <ul id="pedidos-list" class="orders-list">
+                    <li class="loading">Cargando pedidos...</li>
+                </ul>
+            </section>
+
+            <!-- Panel Admin -->
+            <section id="admin-section" style="display:none;">
+                <div class="section-header">
+                    <h2>🛠️ Panel Admin BurgerTIC</h2>
+                    <p>Gestiona platos y pedidos</p>
+                </div>
+                
+                <div style="margin-bottom:40px;">
+                    <h3>🍽️ Ver Menú</h3>
+                    <div id="admin-menu-view"></div>
+                </div>
+
+                <div>
+                    <h3>📦 Gestión de Platos</h3>
+                    <div id="admin-platos-list"></div>
+                    
+                    <div id="add-plato-form" style="display:none; margin-top:20px; background:#fff; border-radius:10px; padding:20px; box-shadow:var(--shadow);">
+                        <h4>Nuevo Plato</h4>
+                        <form onsubmit="handleAddPlato(event)">
+                            <input type="text" id="plato-nombre" placeholder="Nombre" required>
+                            <input type="text" id="plato-descripcion" placeholder="Descripción" required>
+                            <input type="number" id="plato-precio" placeholder="Precio" required>
+                            <select id="plato-tipo" required>
+                                <option value="">Selecciona tipo</option>
+                                <option value="principal">Principal</option>
+                                <option value="combo">Combo</option>
+                                <option value="postre">Postre</option>
+                            </select>
+                            <div class="admin-actions">
+                                <button type="submit" class="btn-save"><span>💾</span>Guardar</button>
+                                <button type="button" onclick="hideAddPlatoForm()" class="btn-cancel"><span>❌</span>Cancelar</button>
+                            </div>
+                        </form>
+                        <p id="add-plato-message" class="message"></p>
+                    </div>
+                    
+                    <button onclick="showAddPlatoForm()" class="btn btn-success" style="margin-top:20px;">➕ Agregar Nuevo Plato</button>
+                </div>
+                
+                <div style="margin-top:40px;">
+                    <h3>📋 Todos los Pedidos</h3>
+                    <ul id="admin-pedidos-list"></ul>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>🍔 BurgerTIC © 2025</p>
+            <p>Para los amantes de las hamburguesas</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
